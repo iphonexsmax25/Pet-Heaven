@@ -7,7 +7,9 @@ import { addNotification } from '../utils/adminData';
 import { sourceLabel, statusLabel } from '../utils/petRules';
 import { formatDate } from '../utils/validators';
 
-const requestLabel = (status) => status.charAt(0).toUpperCase() + status.slice(1);
+const requestLabel = (status) => (status === 'pending'
+  ? 'Pending Review'
+  : status.charAt(0).toUpperCase() + status.slice(1));
 
 // Release requests sent by customers. Employees must open a request to review it
 // before they can approve or reject it. A pet is never released without a pending request.

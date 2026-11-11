@@ -49,14 +49,15 @@ export const releasedByUser = (pet, user) => {
 // Name kept so existing imports still work. It now reads releaseHistory.
 export const wasReleasedByCurrentUser = releasedByUser;
 
-// Release eligibility. A customer may release a pet only when
-//   pet.adoptedByUserId === user.id  (source "adopted")  OR  pet.ownerUserId === user.id  (source "owned").
-// Returns 'adopted', 'owned', or '' when the pet is not theirs to release.
-// A pet that is adopted by someone else can never be released by its owner.
+// Added pets remain owned by their account even though their status is adopted.
+// Adopted pets can be released only by their current adopter, never by a previous owner.
 export const releaseSource = (pet, user) => {
   if (!pet || !user || !user.id) return '';
+  if (pet.status === 'adopted') {
+    if (pet.adoptedByUserId) return pet.adoptedByUserId === user.id ? 'adopted' : '';
+    return pet.ownerUserId === user.id ? 'owned' : '';
+  }
   if (pet.adoptedByUserId && pet.adoptedByUserId === user.id) return 'adopted';
-  if (pet.status === 'adopted') return '';
   return pet.ownerUserId && pet.ownerUserId === user.id ? 'owned' : '';
 };
 export const sourceLabel = (source) => (source === 'adopted' ? 'Adopted' : source === 'owned' ? 'Owned' : '');

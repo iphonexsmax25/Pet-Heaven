@@ -118,7 +118,7 @@ export default function AddPet() {
     }
 
     const description = values.description.trim();
-    // The pet joins the fleet as "available". The status is set here, never chosen by the customer.
+    // User-added pets remain with their account until an employee approves a release.
     const result = addPet({
       name: values.name.trim(),
       species: values.species,
@@ -128,7 +128,7 @@ export default function AddPet() {
       gender: values.gender,
       size: values.size,
       location: `${values.location}, Singapore`,
-      status: 'available',
+      status: 'adopted',
       shortDescription: description.length > 110 ? `${description.slice(0, 107).trim()}...` : description,
       fullDescription: description,
       imageId, // only the image ID is saved in the pet record
@@ -150,12 +150,12 @@ export default function AddPet() {
 
   return (
     <>
-      <PageHeader title="Add a Pet" intro="Add a pet you care for to Pet Heaven so we can help find them a loving home. You can later ask to release a pet from your account." />
+      <PageHeader title="Add a Pet" intro="Add a pet you care for to Pet Heaven. They remain with your account and are not listed for adoption unless an employee approves a release request." />
       <section className="section">
         <div className="container narrow-form wide">
           {successPet && (
             <p className="success-message" role="status">
-              <strong>💛 Pet added.</strong> Thank you for trusting us with {successPet}. They now appear in our available pets. <Link to="/pets">View available pets</Link> or <Link to="/release">request a release</Link> any time.
+              <strong>💛 Pet added.</strong> {successPet} is adopted by your account and will stay out of Available Pets until an employee approves a release request. <Link to="/my-adopted-pets">View your pets</Link> or <Link to="/release">request a release</Link>.
             </p>
           )}
           {submitError && <p className="error-text error-banner" role="alert">{submitError}</p>}

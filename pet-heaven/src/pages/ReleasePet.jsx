@@ -59,8 +59,8 @@ export default function ReleasePet() {
         <div className="container narrow-form wide">
           {submitted && (
             <p className="success-message" role="status">
-              <strong>💛 Release request sent.</strong> Thank you. An employee will review the request for {submitted.petName}.
-              Until it is approved, {submitted.petName} stays {submitted.sourceType === 'adopted' ? 'adopted' : 'in the fleet'} and nothing changes.{' '}
+              <strong>💛 Release request sent for Pending Review.</strong> Thank you. An employee will review the request for {submitted.petName}.
+              Until approved, {submitted.petName} stays with you and remains unavailable for adoption.{' '}
               <Link to="/profile">View my requests</Link>
             </p>
           )}

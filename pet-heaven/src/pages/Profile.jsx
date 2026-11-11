@@ -12,8 +12,9 @@ import { formatDate } from '../utils/validators';
 export default function Profile() {
   const { currentUser: user, favourites, logout } = useAuth();
   const navigate = useNavigate();
-  const { pets, releaseRequests } = usePets();
+  const { pets, releaseRequests, cancelReleaseRequest } = usePets();
   const [savedApplications, setSavedApplications] = useState(getApplications);
+  const [releaseMessage, setReleaseMessage] = useState('');
 
   const favouritePets = pets.filter((pet) => favourites.includes(pet.id));
   const applications = savedApplications.filter(
@@ -22,7 +23,18 @@ export default function Profile() {
   // Release requests this member sent (matched by user ID)
   const releases = releaseRequests
     .filter((item) => item.requestedByUserId === user.id)
-    .map((item) => ({ id: item.id, petName: item.petName, submittedAt: item.submittedAt, status: item.status.charAt(0).toUpperCase() + item.status.slice(1) }));
+    .map((item) => ({
+      ...item,
+      displayStatus: item.status === 'pending'
+        ? 'Pending Review'
+        : item.status.charAt(0).toUpperCase() + item.status.slice(1),
+    }));
+
+  const handleCancelRelease = (requestId, petName) => {
+    if (!window.confirm(`Cancel the release request for ${petName}? ${petName} will remain with you.`)) return;
+    const result = cancelReleaseRequest(requestId, user);
+    setReleaseMessage(result.ok ? `Release request for ${petName} cancelled. The pet remains with you.` : result.error);
+  };
 
   useEffect(() => {
     const refreshApplications = (event) => {
@@ -82,12 +94,21 @@ export default function Profile() {
             </div>
             <div className="info-box">
               <h2>My release requests</h2>
+              {releaseMessage && <p className="notice" role="status">{releaseMessage}</p>}
               {releases.length === 0 ? (
                 <p>No release requests. <Link to="/release">Release a pet</Link></p>
               ) : (
                 <ul className="record-list">
                   {releases.map((item) => (
-                    <li key={item.id}><strong>{item.petName}</strong> <span>Submitted {formatDate(item.submittedAt)} · {item.status}</span></li>
+                    <li key={item.id}>
+                      <strong>{item.petName}</strong>
+                      <span>
+                        Submitted {formatDate(item.submittedAt)} · {item.displayStatus}
+                        {item.status === 'pending' && (
+                          <> · <button type="button" className="btn btn-ghost btn-sm" onClick={() => handleCancelRelease(item.id, item.petName)}>Cancel request</button></>
+                        )}
+                      </span>
+                    </li>
                   ))}
                 </ul>
               )}

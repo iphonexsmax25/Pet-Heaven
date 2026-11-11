@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { pets as seedPets } from '../data/pets';
 import { readStorage, writeStorage } from '../utils/storage';
-import { normalizeEmail, normalizeStatus, migratePetStatuses, releaseSource } from '../utils/petRules';
+import { normalizeEmail, normalizeStatus, releaseSource } from '../utils/petRules';
 import { toYesNoUnknown } from '../utils/petProfile';
 import { saveImage } from '../utils/imageDb';
 
@@ -74,8 +74,8 @@ function normalizePet(pet, fallbackCreatedAt) {
     releasedByUserId,
     releasedByEmail,
     releasedAt,
-    // The customer who added the pet. Pets saved before this field existed belong to whoever added them.
-    ownerUserId: pet.ownerUserId !== undefined ? pet.ownerUserId : releasedByUserId,
+    // Historical release does not mean the releasing customer still owns the pet.
+    ownerUserId: pet.ownerUserId || '',
     releaseHistory,
     adoptionHistory,
     adoptedAt: pet.adoptedAt || '',
@@ -127,10 +127,29 @@ function loadRequests() {
 
 // Fix missing, empty or invalid statuses in the saved fleet. Saves only when a record really changed,
 // so opening the app does not rewrite storage or cause extra renders.
-function migrateStoredStatuses() {
+function migrateStoredPets() {
   const stored = readStorage(PETS_KEY, null);
   if (!Array.isArray(stored)) return;
-  const { pets: migrated, changed } = migratePetStatuses(stored);
+  let changed = false;
+  const migrated = stored.map((pet) => {
+    if (!pet || typeof pet !== 'object' || seedProfiles.has(String(pet.id))) return pet;
+    const status = normalizeStatus(pet.status);
+    let updated = pet;
+    if (pet.status !== status) {
+      updated = { ...updated, status };
+      changed = true;
+    }
+    if (!updated.ownerUserId) return updated;
+    const hasApprovedRelease = asList(updated.releaseHistory).some((entry) => (
+      String(entry.status || '').toLowerCase() === 'approved' || Boolean(entry.approvedAt)
+    )) || Boolean(updated.releasedByUserId || updated.releasedByEmail || updated.releasedAt);
+    if (hasApprovedRelease || (updated.status === 'adopted' && updated.adoptedByUserId === updated.ownerUserId)) return updated;
+    changed = true;
+    return {
+      ...updated,
+      status: 'adopted',
+    };
+  });
   if (changed) writeStorage(PETS_KEY, migrated);
 }
 
@@ -163,7 +182,7 @@ const newId = (prefix) => `${prefix}-${Date.now().toString(36)}-${Math.random().
 
 export function PetsProvider({ children }) {
   const [pets, setPets] = useState(() => {
-    migrateStoredStatuses();
+    migrateStoredPets();
     return loadPets();
   });
   const [releaseRequests, setReleaseRequests] = useState(loadRequests);
@@ -174,11 +193,20 @@ export function PetsProvider({ children }) {
     return () => { active = false; };
   }, []);
 
+  useEffect(() => {
+    const syncStorage = (event) => {
+      if (!event.key || event.key === PETS_KEY) setPets(loadPets());
+      if (!event.key || event.key === RELEASE_REQUESTS_KEY) setReleaseRequests(loadRequests());
+    };
+    window.addEventListener('storage', syncStorage);
+    return () => window.removeEventListener('storage', syncStorage);
+  }, []);
+
   // Saves first; only updates the shared list if storage worked, so the two never disagree
   const addPet = useCallback((pet) => {
+    if (!pet.ownerUserId) return { ok: false, error: 'Please log in to add a pet to your account.' };
     const newPet = normalizePet(
-      // Every new pet starts as "available"; the status can never be chosen when a pet is created
-      { ...pet, id: newId('pet'), status: 'available' },
+      { ...pet, id: newId('pet'), status: 'adopted' },
       new Date().toISOString()
     );
     const current = loadPets();
@@ -254,7 +282,7 @@ export function PetsProvider({ children }) {
       status: 'pending',
       adoptedByUserId: '',
       adoptedAt: '',
-      ownerUserId: application.previousOwnerUserId || '',
+      ownerUserId: '',
       adoptionHistory: pet.adoptionHistory.map((entry) => (
         entry.applicationId === application.id ? { ...entry, cancelledAt: now } : entry
       )),
@@ -377,14 +405,31 @@ export function PetsProvider({ children }) {
     return saved.ok ? { ok: true, request: updated } : saved;
   }, []);
 
+  const cancelReleaseRequest = useCallback((requestId, user) => {
+    if (!user || !user.id) return { ok: false, error: 'Please log in to cancel a release request.' };
+    const requests = loadRequests();
+    const request = requests.find((item) => item.id === requestId);
+    if (!request || request.status !== 'pending') return { ok: false, error: 'This request is no longer pending.' };
+    if (request.requestedByUserId !== user.id) return { ok: false, error: 'You can only cancel your own release requests.' };
+    const updated = {
+      ...request,
+      status: 'cancelled',
+      decidedAt: new Date().toISOString(),
+      decidedBy: normalizeEmail(user.email),
+      decisionNote: 'Cancelled by requester.',
+    };
+    const saved = saveRequests(requests.map((item) => (item.id === requestId ? updated : item)));
+    return saved.ok ? { ok: true, request: updated } : saved;
+  }, []);
+
   const getPet = useCallback((id) => pets.find((pet) => samePet(pet.id, id)), [pets]);
   const value = useMemo(
     () => ({
       pets, releaseRequests, addPet, updatePet, completeAdoption, reopenCompletedAdoption, getPet,
-      submitReleaseRequest, markReleaseRequestReviewed, approveRelease, rejectRelease,
+      submitReleaseRequest, markReleaseRequestReviewed, approveRelease, rejectRelease, cancelReleaseRequest,
     }),
     [pets, releaseRequests, addPet, updatePet, completeAdoption, reopenCompletedAdoption, getPet,
-      submitReleaseRequest, markReleaseRequestReviewed, approveRelease, rejectRelease]
+      submitReleaseRequest, markReleaseRequestReviewed, approveRelease, rejectRelease, cancelReleaseRequest]
   );
   return <PetsContext.Provider value={value}>{children}</PetsContext.Provider>;
 }

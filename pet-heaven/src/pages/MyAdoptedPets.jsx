@@ -22,6 +22,7 @@ export default function MyAdoptedPets() {
 
   const mine = pets.filter((pet) => {
     if (pet.status !== 'adopted') return false;
+    if (pet.ownerUserId === currentUser.id) return true;
     if (pet.adoptedByUserId) return pet.adoptedByUserId === currentUser.id;
     const last = pet.adoptionHistory[pet.adoptionHistory.length - 1];
     if (last) return last.userId ? last.userId === currentUser.id : normalizeEmail(last.email) === email;
@@ -30,11 +31,11 @@ export default function MyAdoptedPets() {
 
   return (
     <>
-      <PageHeader title="My Adopted Pets" intro="Pets you have adopted through Pet Heaven." />
+      <PageHeader title="My Adopted Pets" intro="Pets you added to Pet Heaven or adopted through Pet Heaven." />
       <section className="section">
         <div className="container">
           {mine.length > 0 && <p className="note-text">Can no longer care for an adopted pet? <Link to="/release">Send a release request</Link>.</p>}
-          <PetGrid pets={mine} emptyMessage="You have not adopted a pet yet. Once an employee completes your adoption, your pet will appear here." />
+          <PetGrid pets={mine} emptyMessage="You have not added or adopted a pet yet. Pets you add or adopt will appear here." />
         </div>
       </section>
     </>

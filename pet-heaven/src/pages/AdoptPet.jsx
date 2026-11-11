@@ -93,7 +93,7 @@ export default function AdoptPet() {
     // One open application per person for each pet
     const alreadyApplied = getApplications().some((item) =>
       String(item.petId) === String(pet.id)
-      && ['Pending', 'Approved'].includes(item.status)
+      && !['completed', 'rejected', 'withdrawn'].includes(String(item.status).toLowerCase())
       && (item.applicantUserId
         ? item.applicantUserId === user.id
         : normalizeEmail(item.email) === normalizeEmail(user.email)));

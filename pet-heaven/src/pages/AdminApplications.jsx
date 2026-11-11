@@ -43,7 +43,6 @@ export default function AdminApplications() {
     const patch = journeyPatch(application, LAST_STAGE, {
       status: 'Completed',
       completedAt,
-      previousOwnerUserId: pet.ownerUserId || '',
     });
     if (!updateApplication(application.id, patch)) {
       setMessage('Could not save the change. Browser storage may be full or blocked.');
@@ -54,7 +53,6 @@ export default function AdminApplications() {
       const restored = updateApplication(application.id, {
         ...application,
         completedAt: application.completedAt || '',
-        previousOwnerUserId: application.previousOwnerUserId || '',
       });
       setMessage(restored
         ? result.error
