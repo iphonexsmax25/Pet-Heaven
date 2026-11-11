@@ -5,6 +5,7 @@ import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from './components/ProtectedRoute';
 import RequireEmployee from './components/RequireEmployee';
 import CustomerOrPublicRoute from './components/CustomerOrPublicRoute';
+import CustomerOnlyRoute from './components/CustomerOnlyRoute';
 import Home from './pages/Home';
 import Dogs from './pages/Dogs';
 import Cats from './pages/Cats';
@@ -56,7 +57,7 @@ export default function App() {
           <Route path="/contact" element={<CustomerOrPublicRoute><Contact /></CustomerOrPublicRoute>} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
-          <Route path="/adopt" element={<AdoptPet />} />
+          <Route path="/adopt" element={<CustomerOnlyRoute><AdoptPet /></CustomerOnlyRoute>} />
           <Route path="/release" element={<ProtectedRoute><ReleasePet /></ProtectedRoute>} />
           <Route path="/add-pet" element={<ProtectedRoute><AddPet /></ProtectedRoute>} />
           <Route path="/pet-care" element={<PetCare />} />

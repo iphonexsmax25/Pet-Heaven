@@ -39,12 +39,14 @@ export default function Login() {
       <PageHeader title="Member Login" intro="Log in to manage your favourites and write reviews." />
       <section className="section">
         <div className="container narrow-form">
-          {location.state?.from && <p className="notice">Please log in to view that page.</p>}
+          {location.state?.adoptionApplication
+            ? <p className="notice">Please sign up or log in to apply for adoption.</p>
+            : location.state?.from && <p className="notice">Please log in to view that page.</p>}
           <form className="form-card" onSubmit={handleSubmit} noValidate aria-label="Log in form">
             <FormInput label="Email" name="email" type="email" value={values.email} onChange={handleChange} error={errors.email} required autoComplete="email" />
             <PasswordField label="Password" name="password" value={values.password} onChange={handleChange} error={errors.password} autoComplete="current-password" showChecklist={false} />
             <button type="submit" className="btn btn-primary btn-block">Log In</button>
-            <p className="form-switch">No account yet? <Link to="/signup">Sign up</Link></p>
+            <p className="form-switch">No account yet? <Link to="/signup" state={location.state}>Sign up</Link></p>
           </form>
         </div>
       </section>

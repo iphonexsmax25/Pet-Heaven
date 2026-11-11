@@ -1,4 +1,4 @@
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
 import FormInput from '../components/FormInput';
 import PasswordField from '../components/PasswordField';
@@ -9,6 +9,7 @@ import { isEmail, passwordProblems } from '../utils/validators';
 export default function SignUp() {
   const { isAuthenticated, isEmployee, signup } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { values, errors, showErrors, handleChange } = useForm({ name: '', email: '', password: '', confirm: '' });
 
   if (isAuthenticated) return <Navigate to={isEmployee ? '/admin/dashboard' : '/'} replace />;
@@ -35,7 +36,11 @@ export default function SignUp() {
       return showErrors(Object.keys(result.errors).length > 0 ? result.errors : { email: result.error });
     }
     // The account is created and the member is already logged in
-    navigate(result.user.role === 'employee' ? '/admin/dashboard' : '/', { replace: true, state: { flash: `Account created! Welcome to Pet Heaven, ${result.user.name}.` } });
+    const from = location.state?.from;
+    const target = result.user.role === 'employee'
+      ? (from && from.startsWith('/admin') ? from : '/admin/dashboard')
+      : (from || '/');
+    navigate(target, { replace: true, state: { flash: `Account created! Welcome to Pet Heaven, ${result.user.name}.` } });
     return undefined;
   };
 
@@ -44,13 +49,14 @@ export default function SignUp() {
       <PageHeader title="Become a Member" intro="Create an account to save favourite pets and share your story." />
       <section className="section">
         <div className="container narrow-form">
+          {location.state?.adoptionApplication && <p className="notice">Please sign up or log in to apply for adoption.</p>}
           <form className="form-card" onSubmit={handleSubmit} noValidate aria-label="Sign up form">
             <FormInput label="Full name" name="name" value={values.name} onChange={handleChange} error={errors.name} required autoComplete="name" />
             <FormInput label="Email" name="email" type="email" value={values.email} onChange={handleChange} error={errors.email} required autoComplete="email" />
             <PasswordField label="Password" name="password" value={values.password} onChange={handleChange} error={errors.password} />
             <FormInput label="Confirm password" name="confirm" type="password" value={values.confirm} onChange={handleChange} error={errors.confirm} required autoComplete="new-password" />
             <button type="submit" className="btn btn-primary btn-block">Create Account</button>
-            <p className="form-switch">Already a member? <Link to="/login">Log in</Link></p>
+            <p className="form-switch">Already a member? <Link to="/login" state={location.state}>Log in</Link></p>
             <p className="note-text">Accounts are saved only in this browser (localStorage). This is a student demo, so please do not use a real password.</p>
           </form>
         </div>

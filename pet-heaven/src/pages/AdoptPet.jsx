@@ -14,7 +14,7 @@ export default function AdoptPet() {
   const [searchParams] = useSearchParams();
   const { currentUser: user } = useAuth();
   const { pets, getPet } = usePets();
-  // Only available pets can be adopted. Anyone may apply, including a customer who released the pet earlier.
+  // Only available pets can be adopted, including by customers who previously released them.
   const availablePets = pets.filter((pet) => pet.status === 'available');
 
   // If we arrived from a pet page (/adopt?pet=3), pre-select that pet
@@ -41,8 +41,15 @@ export default function AdoptPet() {
     event.preventDefault();
     setSubmitError('');
 
+    if (!user || user.role !== 'customer') {
+      setSuccessName('');
+      setSubmitError(user
+        ? 'Only customer accounts can submit adoption applications.'
+        : 'Please sign up or log in to apply for adoption.');
+      return;
+    }
+
     // Rule check first, using the saved pet record (not just what the page shows).
-    // Anyone may apply for an available pet, including a customer who owned, adopted or released it before.
     const chosenPet = values.petId ? getPet(values.petId) : null;
 
     // An adopted pet can never be adopted again, even if the form was opened from its address
@@ -87,7 +94,9 @@ export default function AdoptPet() {
     const alreadyApplied = getApplications().some((item) =>
       String(item.petId) === String(pet.id)
       && ['Pending', 'Approved'].includes(item.status)
-      && ((user && item.applicantUserId === user.id) || normalizeEmail(item.email) === normalizeEmail(values.email)));
+      && (item.applicantUserId
+        ? item.applicantUserId === user.id
+        : normalizeEmail(item.email) === normalizeEmail(user.email)));
     if (alreadyApplied) {
       setSuccessName('');
       setSubmitError('You already have an application for this pet.');
