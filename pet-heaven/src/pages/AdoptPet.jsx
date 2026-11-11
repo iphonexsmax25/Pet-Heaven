@@ -5,7 +5,7 @@ import FormInput from '../components/FormInput';
 import useForm from '../hooks/useForm';
 import { usePets } from '../context/PetsContext';
 import { appendToList } from '../utils/storage';
-import { getApplications } from '../utils/adminData';
+import { getApplications, isActiveApplication } from '../utils/adminData';
 import { ALREADY_ADOPTED_MESSAGE, normalizeEmail } from '../utils/petRules';
 import { isEmail, isSingaporePhone } from '../utils/validators';
 import { useAuth } from '../context/AuthContext';
@@ -93,7 +93,7 @@ export default function AdoptPet() {
     // One open application per person for each pet
     const alreadyApplied = getApplications().some((item) =>
       String(item.petId) === String(pet.id)
-      && !['completed', 'rejected', 'withdrawn'].includes(String(item.status).toLowerCase())
+      && isActiveApplication(item)
       && (item.applicantUserId
         ? item.applicantUserId === user.id
         : normalizeEmail(item.email) === normalizeEmail(user.email)));

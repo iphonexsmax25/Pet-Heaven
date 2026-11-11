@@ -3,13 +3,20 @@ import { pets as seedPets } from '../data/pets';
 import { readStorage, writeStorage } from '../utils/storage';
 import { normalizeEmail, normalizeStatus, releaseSource } from '../utils/petRules';
 import { toYesNoUnknown } from '../utils/petProfile';
-import { saveImage } from '../utils/imageDb';
+import { deleteImage, saveImage } from '../utils/imageDb';
+import {
+  cancelApplication as cancelSavedApplication,
+  getApplications,
+  isActiveApplication,
+  updateApplication,
+} from '../utils/adminData';
 
 export const PETS_KEY = 'petheaven_pets';
 export const RELEASE_REQUESTS_KEY = 'petheaven_release_requests';
 const PetsContext = createContext(null);
 
-// Pets are never deleted. Each pet record keeps its own history:
+// Adoption/release transitions retain history on pet records. Owner-added pets can be removed
+// before any active adoption or approved release process.
 //   releaseHistory:  [{ id, requestId, type, sourceType, userId, email, status, requestedAt, approvedAt, approvedBy }]
 //   adoptionHistory: [{ id, applicationId, userId, email, adoptedAt, returnedAt? }]
 // Images are not stored here: a pet only keeps imageId (the image itself is in IndexedDB).
@@ -219,6 +226,79 @@ export function PetsProvider({ children }) {
     return { ok: true, pet: newPet };
   }, []);
 
+  const removePet = useCallback(async (id, user) => {
+    if (!user || !user.id) return { ok: false, error: 'Please log in to remove a pet.' };
+    let current;
+    let requests;
+    try {
+      current = loadPets();
+      requests = loadRequests();
+    } catch (error) {
+      return { ok: false, error: 'Could not read the saved pet records.' };
+    }
+    const pet = current.find((item) => samePet(item.id, id));
+    if (!pet) return { ok: false, error: 'Pet not found.' };
+    if (seedProfiles.has(String(pet.id))) return { ok: false, error: 'Preloaded pets cannot be removed.' };
+    if (pet.ownerUserId !== user.id) return { ok: false, error: 'You can only remove a pet you added to your account.' };
+    if (requests.some((item) => samePet(item.petId, pet.id))) {
+      return { ok: false, error: 'This pet cannot be removed while it has a release request.' };
+    }
+    if (getApplications().some((item) => samePet(item.petId, pet.id) && isActiveApplication(item))) {
+      return { ok: false, error: 'This pet cannot be removed while it has an active adoption application.' };
+    }
+
+    const nextPets = current.filter((item) => !samePet(item.id, pet.id));
+    const nextRequests = requests.filter((item) => !samePet(item.petId, pet.id));
+    const updates = new Map([
+      [PETS_KEY, JSON.stringify(nextPets)],
+      [RELEASE_REQUESTS_KEY, JSON.stringify(nextRequests)],
+    ]);
+    try {
+      const store = window.localStorage;
+      const favouriteKeys = [];
+      for (let index = 0; index < store.length; index += 1) {
+        const key = store.key(index);
+        if (key && key.startsWith('petheaven_favourites_')) favouriteKeys.push(key);
+      }
+      favouriteKeys.forEach((key) => {
+        const value = store.getItem(key);
+        const favourites = JSON.parse(value);
+        if (Array.isArray(favourites)) {
+          updates.set(key, JSON.stringify(favourites.filter((favouriteId) => !samePet(favouriteId, pet.id))));
+        }
+      });
+
+      const previousValues = new Map([...updates.keys()].map((key) => [key, store.getItem(key)]));
+      const written = [];
+      try {
+        updates.forEach((value, key) => {
+          store.setItem(key, value);
+          written.push(key);
+        });
+      } catch (error) {
+        written.forEach((key) => {
+          const previous = previousValues.get(key);
+          if (previous === null) store.removeItem(key);
+          else store.setItem(key, previous);
+        });
+        return { ok: false, error: 'Could not remove the pet from browser storage. No records were changed.' };
+      }
+    } catch (error) {
+      return { ok: false, error: 'Could not update saved favourites and pet records in browser storage.' };
+    }
+
+    setPets(nextPets);
+    setReleaseRequests(nextRequests);
+    if (pet.imageId) {
+      try {
+        await deleteImage(pet.imageId);
+      } catch (error) {
+        return { ok: true, warning: 'The pet was removed, but its saved image could not be deleted from this browser.' };
+      }
+    }
+    return { ok: true };
+  }, []);
+
   const saveList = (next, id) => {
     if (!writeStorage(PETS_KEY, next)) return { ok: false, error: 'Could not save the change. Browser storage may be full or blocked.' };
     setPets(next);
@@ -245,6 +325,33 @@ export function PetsProvider({ children }) {
     });
     return saveList(next, id);
   }, []);
+
+  const cancelAdoptionApplication = useCallback((applicationId, user) => {
+    const application = getApplications().find((item) => item.id === applicationId);
+    if (!application) return { ok: false, error: 'This application could not be found.' };
+    const cancelled = cancelSavedApplication(applicationId, user);
+    if (!cancelled.ok) return cancelled;
+
+    const hasOtherApprovedApplication = getApplications().some((item) => (
+      item.id !== applicationId
+      && samePet(item.petId, application.petId)
+      && String(item.status).toLowerCase() === 'approved'
+    ));
+    const pet = loadPets().find((item) => samePet(item.id, application.petId));
+    if (pet && pet.status === 'pending' && !hasOtherApprovedApplication) {
+      const restoredPet = updatePet(pet.id, { status: 'available' });
+      if (!restoredPet.ok) {
+        const restoredApplication = updateApplication(applicationId, application);
+        return {
+          ok: false,
+          error: restoredApplication
+            ? restoredPet.error
+            : `${restoredPet.error} The application status could not be restored; refresh the page and check its saved status.`,
+        };
+      }
+    }
+    return cancelled;
+  }, [updatePet]);
 
   // Employee completes an adoption: only now does the pet become "adopted".
   // The same record is updated with map() (never removed); releaseHistory and adoptionHistory are kept.
@@ -426,10 +533,10 @@ export function PetsProvider({ children }) {
   const value = useMemo(
     () => ({
       pets, releaseRequests, addPet, updatePet, completeAdoption, reopenCompletedAdoption, getPet,
-      submitReleaseRequest, markReleaseRequestReviewed, approveRelease, rejectRelease, cancelReleaseRequest,
+      removePet, cancelAdoptionApplication, submitReleaseRequest, markReleaseRequestReviewed, approveRelease, rejectRelease, cancelReleaseRequest,
     }),
     [pets, releaseRequests, addPet, updatePet, completeAdoption, reopenCompletedAdoption, getPet,
-      submitReleaseRequest, markReleaseRequestReviewed, approveRelease, rejectRelease, cancelReleaseRequest]
+      removePet, cancelAdoptionApplication, submitReleaseRequest, markReleaseRequestReviewed, approveRelease, rejectRelease, cancelReleaseRequest]
   );
   return <PetsContext.Provider value={value}>{children}</PetsContext.Provider>;
 }

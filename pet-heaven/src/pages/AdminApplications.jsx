@@ -1,8 +1,8 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import PageHeader from '../components/PageHeader';
 import AdoptionJourney from '../components/AdoptionJourney';
 import { usePets } from '../context/PetsContext';
-import { addNotification, getApplications, updateApplication } from '../utils/adminData';
+import { addNotification, APPLICATIONS_KEY, getApplications, updateApplication } from '../utils/adminData';
 import { JOURNEY_STAGES, LAST_STAGE, getJourney, journeyPatch, stopPatch } from '../utils/adoptionJourney';
 import { formatDate } from '../utils/validators';
 
@@ -14,6 +14,14 @@ export default function AdminApplications() {
   const [message, setMessage] = useState('');
 
   const refresh = () => setApplications(getApplications());
+
+  useEffect(() => {
+    const syncApplications = (event) => {
+      if (!event.key || event.key === APPLICATIONS_KEY) refresh();
+    };
+    window.addEventListener('storage', syncApplications);
+    return () => window.removeEventListener('storage', syncApplications);
+  }, []);
 
   const rejectApplication = (application) => {
     if (getJourney(application).stage !== 0 || application.status !== 'Pending') return;

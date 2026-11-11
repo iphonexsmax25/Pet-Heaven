@@ -4,7 +4,7 @@ import PetImage from './PetImage';
 import { formatDate } from '../utils/validators';
 import { ALREADY_ADOPTED_MESSAGE, statusLabel } from '../utils/petRules';
 
-export default function PetCard({ pet }) {
+export default function PetCard({ pet, children }) {
   const { favourites, toggleFavourite } = useAuth();
   const isFavourite = favourites.includes(pet.id);
   const navigate = useNavigate();
@@ -47,6 +47,7 @@ export default function PetCard({ pet }) {
           View Details
         </Link>
         {pet.status === 'adopted' && <p className="pet-restriction-message">{ALREADY_ADOPTED_MESSAGE}</p>}
+        {children}
       </div>
     </article>
   );

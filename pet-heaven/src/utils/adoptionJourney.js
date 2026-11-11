@@ -8,7 +8,7 @@ export const JOURNEY_STAGES = [
 ];
 
 export const LAST_STAGE = JOURNEY_STAGES.length - 1;
-const STOPPED_STATUSES = ['Rejected', 'Withdrawn'];
+const STOPPED_STATUSES = ['Rejected', 'Withdrawn', 'Cancelled'];
 const JOURNEY_VERSION = 2;
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
@@ -100,7 +100,11 @@ export function getJourney(application) {
   });
 
   const reason = normalized.stopReason
-    || (status === 'Withdrawn' ? 'The applicant withdrew this application.' : 'This application was not approved.');
+    || (status === 'Cancelled'
+      ? 'The applicant cancelled this application.'
+      : status === 'Withdrawn'
+        ? 'The applicant withdrew this application.'
+        : 'This application was not approved.');
   const date = stopped
     ? normalized.stoppedAt || normalized.stageUpdatedAt || ''
     : dateFor(stage) || normalized.stageUpdatedAt || normalized.submittedAt || '';

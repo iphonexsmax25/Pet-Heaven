@@ -1,11 +1,22 @@
 import { readStorage, writeStorage } from './storage';
-import { migrateJourneyApplication } from './adoptionJourney';
+import { getJourney, migrateJourneyApplication, stopPatch } from './adoptionJourney';
+import { normalizeEmail } from './petRules';
 
 // Adoption applications and simulated email notifications (browser localStorage only)
 export const APPLICATIONS_KEY = 'petheaven_applications';
 export const NOTIFICATIONS_KEY = 'petheaven_notifications';
 
 const asList = (value) => (Array.isArray(value) ? value.filter(Boolean) : []);
+const TERMINAL_APPLICATION_STATUSES = ['completed', 'rejected', 'withdrawn', 'cancelled'];
+
+export const isActiveApplication = (application) =>
+  !TERMINAL_APPLICATION_STATUSES.includes(String(application.status || 'Pending').toLowerCase());
+
+export const ownsApplication = (application, user) => Boolean(user && (
+  application.applicantUserId
+    ? String(application.applicantUserId) === String(user.id)
+    : normalizeEmail(application.email) === normalizeEmail(user.email)
+));
 
 // Older saved applications had no status, so treat them as Pending and migrate their journey stages once.
 export const getApplications = () => {
@@ -20,6 +31,27 @@ export const getApplications = () => {
 export function updateApplication(id, patch) {
   const list = getApplications().map((item) => (item.id === id ? { ...item, ...patch } : item));
   return writeStorage(APPLICATIONS_KEY, list);
+}
+
+export function cancelApplication(id, user) {
+  if (!user || !user.id || user.role !== 'customer') {
+    return { ok: false, error: 'Only customers can cancel an adoption application.' };
+  }
+  const application = getApplications().find((item) => item.id === id);
+  if (!application) return { ok: false, error: 'This application could not be found.' };
+  if (!ownsApplication(application, user)) {
+    return { ok: false, error: 'You can only cancel your own applications.' };
+  }
+  if (!isActiveApplication(application) || getJourney(application).complete) {
+    return { ok: false, error: 'This application can no longer be cancelled.' };
+  }
+  const saved = updateApplication(application.id, {
+    status: 'Cancelled',
+    ...stopPatch(application, 'The applicant cancelled this application.'),
+  });
+  return saved
+    ? { ok: true }
+    : { ok: false, error: 'Could not save the change. Browser storage may be full or blocked.' };
 }
 
 export const getNotifications = () => asList(readStorage(NOTIFICATIONS_KEY, []));

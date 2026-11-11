@@ -21,12 +21,14 @@ export default function AdminReleases() {
   const [message, setMessage] = useState('');
 
   // Pending requests first, then newest first
-  const sorted = [...releaseRequests].sort((a, b) => {
-    if ((a.status === 'pending') !== (b.status === 'pending')) return a.status === 'pending' ? -1 : 1;
-    return new Date(b.submittedAt) - new Date(a.submittedAt);
-  });
+  const sorted = releaseRequests
+    .filter((request) => request.status !== 'cancelled')
+    .sort((a, b) => {
+      if ((a.status === 'pending') !== (b.status === 'pending')) return a.status === 'pending' ? -1 : 1;
+      return new Date(b.submittedAt) - new Date(a.submittedAt);
+    });
   const pendingCount = releaseRequests.filter((request) => request.status === 'pending').length;
-  const openRequest = releaseRequests.find((request) => request.id === openId);
+  const openRequest = releaseRequests.find((request) => request.id === openId && request.status !== 'cancelled');
 
   // Opening a request is the review step
   const handleOpen = (request) => {
@@ -122,8 +124,8 @@ export default function AdminReleases() {
             </div>
           )}
 
-          {releaseRequests.length === 0 ? (
-            <div className="info-box"><p>No release requests yet.</p></div>
+          {sorted.length === 0 ? (
+            <div className="info-box"><p>No release requests to review.</p></div>
           ) : (
             <>
               <p className="result-count" aria-live="polite"><strong>{pendingCount}</strong> pending {pendingCount === 1 ? 'request' : 'requests'}</p>

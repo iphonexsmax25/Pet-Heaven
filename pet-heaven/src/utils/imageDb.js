@@ -65,7 +65,7 @@ export async function getImage(id) {
   return record && record.blob ? record.blob : null;
 }
 
-// Only used to clean up an image whose pet could not be saved
+// Removes a saved image when its pet is removed or could not be saved.
 export async function deleteImage(id) {
   if (!id) return;
   await run('readwrite', (store) => store.delete(id));
