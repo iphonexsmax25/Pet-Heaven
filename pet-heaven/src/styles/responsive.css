@@ -1,0 +1,85 @@
+/* ===== Pet Heaven: responsive styles ===== */
+
+/* Laptop and below: hamburger menu */
+@media (max-width: 1023px) {
+  .desktop-only { display: none !important; }
+  .mobile-only { display: flex !important; }
+  .menu-toggle { display: flex; }
+
+  .site-nav {
+    max-height: 0; overflow: hidden; opacity: 0; visibility: hidden;
+    border-top-color: transparent;
+    transition: max-height 0.4s ease, opacity 0.3s ease, visibility 0.4s;
+  }
+  .site-nav.open {
+    max-height: calc(100vh - 64px); max-height: calc(100dvh - 64px);
+    overflow-y: auto; opacity: 1; visibility: visible; border-top-color: var(--color-border);
+    box-shadow: 0 16px 24px var(--color-shadow);
+  }
+  .site-nav.open > .container { display: flex; flex-direction: column; min-height: calc(100vh - 64px); min-height: calc(100dvh - 64px); }
+  .nav-links { flex-direction: column; align-items: stretch; gap: 0.1rem; padding: 0.35rem 0 0.2rem; }
+  .nav-links > li { width: 100%; }
+  .nav-link { width: 100%; min-height: 40px; padding: 0.35rem 0.75rem; }
+  .nav-group-toggle { justify-content: space-between; }
+  .nav-group-links { position: static; min-width: 0; padding: 0 0 0.2rem 0.65rem; background: transparent; border: 0; border-radius: 0; box-shadow: none; }
+  .nav-group-links .nav-link { min-height: 38px; padding-left: 0.85rem; white-space: normal; }
+  .mobile-actions { flex-direction: column; align-items: stretch; gap: 0.35rem; padding: 0.45rem 0; }
+  .mobile-actions-top { border-bottom: 1px solid var(--color-border); }
+  .mobile-actions-bottom { margin-top: auto; border-top: 1px solid var(--color-border); padding: 0.45rem 0 0.65rem; }
+  .mobile-actions .btn { width: 100%; min-height: 40px; padding: 0.4rem 0.75rem; }
+  .mobile-actions .theme-toggle { width: 100%; height: auto; min-height: 40px; padding: 0.35rem 0.75rem; }
+  .mobile-actions .theme-toggle-label { display: inline; }
+
+  .filter-panel { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Tablet */
+@media (max-width: 768px) {
+  .hero-grid, .split, .details-grid, .contact-grid, .two-col, .category-grid { grid-template-columns: 1fr; }
+  .video-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hero-media { order: -1; }
+  .hero-badge { left: 0.75rem; bottom: -1rem; }
+  .hero { padding-bottom: 3rem; }
+  .filter-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .form-grid { grid-template-columns: 1fr; }
+  .page-header p { font-size: 1rem; }
+}
+
+/* Large mobile and below */
+@media (max-width: 480px) {
+  .container, .narrow, .narrow-form, .narrow-form.wide { width: calc(100% - 1.5rem); }
+  .video-grid { grid-template-columns: 1fr; }
+  .logo { font-size: 1.2rem; }
+  .logo-icon { width: 36px; height: 36px; }
+  .filter-panel { grid-template-columns: 1fr; padding: 1rem; }
+  .filter-footer { flex-direction: column; align-items: stretch; text-align: center; }
+  .filter-footer .btn { width: 100%; }
+  .fact-grid { grid-template-columns: 1fr; }
+  .gallery-thumb { width: 64px; height: 64px; }
+  .button-row .btn { flex: 1 1 100%; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .form-card { padding: 1.1rem; }
+  .category-card { padding: 1.4rem; }
+  .profile-card { flex-direction: column; align-items: flex-start; }
+  .profile-card .btn { width: 100%; }
+  .star-label { font-size: 2.4rem; }
+}
+
+/* Very small phones (320px) */
+@media (max-width: 360px) {
+  body { font-size: 0.97rem; }
+  .logo { font-size: 1.1rem; }
+  .btn { padding-inline: 1rem; }
+  .hero-badge { font-size: 0.9rem; padding: 0.5rem 0.8rem; }
+}
+
+/* Monthly reports on phones */
+@media (max-width: 480px) {
+  .monthly-controls .form-field { flex: 1 1 100%; }
+  .monthly-buttons { width: 100%; }
+  .monthly-buttons .btn { flex: 1 1 100%; width: 100%; }
+  .archive-head .btn { width: 100%; }
+  .archive-list li { flex-direction: column; align-items: stretch; }
+  .archive-actions .btn { flex: 1 1 100%; width: 100%; }
+}

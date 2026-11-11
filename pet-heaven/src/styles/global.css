@@ -1,0 +1,287 @@
+/* ===== Pet Heaven: global styles ===== */
+/* Theme colours. Every colour used by the pages comes from these semantic variables.
+   Light is the default. data-theme ("light" or "dark") is set on <html> by index.html (before React) and by ThemeContext. */
+:root,
+[data-theme="light"] {
+  --color-bg: #fffaf3;
+  --color-surface: #ffffff;
+  --color-surface-soft: #fff0df;
+  --color-text: #2b1d14;
+  --color-text-muted: #725846;
+  --color-border: #e8c9aa;
+  --color-primary: #c93f06;
+  --color-primary-hover: #a83204;
+  --color-input-bg: #fffaf3;
+  --color-shadow: rgba(75, 42, 20, 0.10);
+
+  --color-shadow-strong: rgba(75, 42, 20, 0.16);
+  --color-input-border: #d9c3a5;
+  --color-on-primary: #ffffff;
+  --color-primary-soft: #ffe8d9;
+  --color-link: #a83204;
+  --color-link-hover: #c93f06;
+  --color-header-bg: rgba(255, 250, 243, 0.97);
+  --color-overlay-surface: rgba(255, 255, 255, 0.95);
+  --color-focus: #1f7a4f;
+  --color-focus-ring: rgba(31, 122, 79, 0.25);
+
+  --color-success: #1f7a4f;
+  --color-on-success: #ffffff;
+  --color-success-deep: #165c3b;
+  --color-success-end: #21855a;
+  --color-success-soft: #e1f3e8;
+  --color-success-border: #8fd1ac;
+  --color-success-text: #0f4a2e;
+  --color-success-accent: #1f7a4f;
+  --color-danger: #b91c1c;
+  --color-danger-soft: #fff5f5;
+  --color-danger-border: #f4b4b4;
+  --color-warning-bg: #fde68a;
+  --color-warning-text: #78350f;
+  --color-neutral-bg: #e5e7eb;
+  --color-neutral-text: #374151;
+
+  --color-star-off: #d6cabb;
+  --color-star-on: #e8890c;
+  --color-fav: #e11d48;
+  --color-on-dark: #ffffff;
+  --color-overlay-light: rgba(255, 255, 255, 0.12);
+  --color-overlay-light-hover: rgba(255, 255, 255, 0.15);
+  --color-btn-light-bg: #ffffff;
+  --color-btn-light-text: #9a3412;
+  --color-cta-from: #c93f06;
+  --color-cta-to: #d4450e;
+  --color-footer-bg: #231a12;
+  --color-footer-text: #f1e6d6;
+  --color-footer-heading: #ffffff;
+  --color-footer-accent: #ffb68a;
+  --color-footer-border: rgba(255, 255, 255, 0.15);
+
+  --shadow-sm: 0 2px 8px var(--color-shadow);
+  --shadow-md: 0 12px 30px var(--color-shadow-strong);
+  --radius: 20px;
+  --radius-sm: 12px;
+  --font-head: 'Quicksand', 'Nunito', system-ui, sans-serif;
+  --font-body: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --color-bg: #17120f;
+  --color-surface: #241c17;
+  --color-surface-soft: #302219;
+  --color-text: #fff7ee;
+  --color-text-muted: #d8c5b5;
+  --color-border: #604936;
+  --color-primary: #f0642a;
+  --color-primary-hover: #ff7a42;
+  --color-input-bg: #201813;
+  --color-shadow: rgba(0, 0, 0, 0.35);
+
+  --color-shadow-strong: rgba(0, 0, 0, 0.5);
+  --color-input-border: #8a6d55;
+  --color-on-primary: #1a0f08;
+  --color-primary-soft: #3b2417;
+  --color-link: #ff9a6b;
+  --color-link-hover: #ffb68a;
+  --color-header-bg: rgba(23, 18, 15, 0.97);
+  --color-overlay-surface: rgba(36, 28, 23, 0.92);
+  --color-focus: #7fe0aa;
+  --color-focus-ring: rgba(127, 224, 170, 0.3);
+
+  --color-success: #1f7a4f;
+  --color-on-success: #ffffff;
+  --color-success-deep: #0f3d28;
+  --color-success-end: #1f7a4f;
+  --color-success-soft: #14301f;
+  --color-success-border: #2f7a52;
+  --color-success-text: #bdf0d2;
+  --color-success-accent: #6ee0a5;
+  --color-danger: #ff9a9a;
+  --color-danger-soft: #3a1818;
+  --color-danger-border: #8a3a3a;
+  --color-warning-bg: #4a3a10;
+  --color-warning-text: #fde68a;
+  --color-neutral-bg: #3a332d;
+  --color-neutral-text: #e8ddd2;
+
+  --color-star-off: #5c4a3b;
+  --color-star-on: #ffb02e;
+  --color-fav: #ff7d99;
+  --color-footer-bg: #0f0b08;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 0.95rem + 0.2vw, 1.0625rem);
+  line-height: 1.65;
+  color: var(--color-text);
+  background: var(--color-bg);
+  overflow-x: hidden;
+}
+
+img { max-width: 100%; height: auto; display: block; }
+
+h1, h2, h3, h4 { font-family: var(--font-head); line-height: 1.2; margin: 0 0 0.6em; color: var(--color-text); }
+h1 { font-size: clamp(1.9rem, 1.2rem + 3vw, 3.4rem); }
+h2 { font-size: clamp(1.5rem, 1.15rem + 1.5vw, 2.2rem); }
+h3 { font-size: clamp(1.1rem, 1rem + 0.5vw, 1.35rem); }
+p { margin: 0 0 1em; overflow-wrap: break-word; }
+ul, ol { padding-left: 1.2rem; }
+
+a { color: var(--color-link); }
+a:hover { color: var(--color-link-hover); }
+
+:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 3px; border-radius: 6px; }
+main:focus { outline: none; }
+
+.container { width: min(1140px, 100% - 2rem); margin-inline: auto; }
+.narrow { width: min(780px, 100% - 2rem); margin-inline: auto; }
+.narrow-form { width: min(560px, 100% - 2rem); margin-inline: auto; }
+.narrow-form.wide { width: min(760px, 100% - 2rem); }
+.center-text { text-align: center; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+.skip-link {
+  position: absolute; left: 1rem; top: -4rem; z-index: 200;
+  background: var(--color-primary); color: var(--color-on-primary); padding: 0.6rem 1rem; border-radius: 8px;
+}
+.skip-link:focus { top: 0.75rem; color: var(--color-on-primary); }
+
+/* ----- Sections ----- */
+.section { padding: clamp(2.5rem, 6vw, 5rem) 0; }
+.section-tint { background: var(--color-surface-soft); }
+.section-green { background: var(--color-success-deep); color: var(--color-on-dark); }
+.section-green h2, .section-green h3 { color: var(--color-on-dark); }
+.section-head { text-align: center; max-width: 640px; margin: 0 auto 2rem; }
+.section-head p { color: var(--color-text-muted); }
+.center-row { text-align: center; margin-top: 2rem; }
+
+/* ----- Buttons ----- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+  min-height: 46px; padding: 0.65rem 1.5rem;
+  border: 2px solid transparent; border-radius: 999px;
+  font-family: var(--font-head); font-size: 1rem; font-weight: 700; line-height: 1.2;
+  text-decoration: none; text-align: center; cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.btn:active { transform: translateY(0); }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-sm { min-height: 40px; padding: 0.45rem 1.1rem; font-size: 0.95rem; }
+.btn-block { width: 100%; }
+.btn-primary { background: var(--color-primary); color: var(--color-on-primary); }
+.btn-primary:hover { background: var(--color-primary-hover); color: var(--color-on-primary); }
+.btn-outline { background: transparent; color: var(--color-link); border-color: var(--color-primary); }
+.btn-outline:hover, .btn-outline.is-active { background: var(--color-primary-soft); color: var(--color-link); }
+.btn-green { background: var(--color-success); color: var(--color-on-success); }
+.btn-green:hover { background: var(--color-success-deep); color: var(--color-on-success); }
+.btn-ghost { background: transparent; color: var(--color-text); border-color: var(--color-border); }
+.btn-ghost:hover { background: var(--color-surface-soft); color: var(--color-text); }
+.btn-light { background: var(--color-btn-light-bg); color: var(--color-btn-light-text); }
+.btn-light:hover { background: var(--color-primary-soft); color: var(--color-link); }
+.btn-outline-light { background: transparent; color: var(--color-on-dark); border-color: var(--color-on-dark); }
+.btn-outline-light:hover { background: var(--color-overlay-light-hover); color: var(--color-on-dark); }
+.button-row { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.25rem; }
+.button-row-center { justify-content: center; }
+
+/* ----- Forms ----- */
+.form-card {
+  background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius);
+  padding: clamp(1.25rem, 4vw, 2.25rem); box-shadow: var(--shadow-sm);
+}
+.form-card h2 { font-size: 1.4rem; }
+fieldset { border: 0; padding: 0; margin: 0 0 1.5rem; min-width: 0; }
+legend {
+  font-family: var(--font-head); font-weight: 700; font-size: 1.15rem;
+  padding: 0 0 0.4rem; margin-bottom: 1rem; width: 100%;
+  border-bottom: 2px dashed var(--color-border);
+}
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 1rem; }
+.form-field { margin-bottom: 1.1rem; min-width: 0; }
+.form-field label { display: block; font-weight: 700; font-size: 0.95rem; margin-bottom: 0.35rem; }
+input, select, textarea {
+  width: 100%; min-height: 46px; padding: 0.6rem 0.85rem;
+  font: inherit; color: var(--color-text); background: var(--color-input-bg);
+  border: 1.5px solid var(--color-input-border); border-radius: var(--radius-sm);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+/* Native form parts (date picker, dropdown list, scrollbars) follow the selected theme. */
+input, select, textarea, button { color-scheme: light dark; }
+[data-theme="light"] input, [data-theme="light"] select, [data-theme="light"] textarea, [data-theme="light"] button { color-scheme: light; }
+[data-theme="dark"] input, [data-theme="dark"] select, [data-theme="dark"] textarea, [data-theme="dark"] button { color-scheme: dark; }
+::placeholder { color: var(--color-text-muted); opacity: 1; }
+option { background: var(--color-input-bg); color: var(--color-text); }
+input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
+  -webkit-text-fill-color: var(--color-text);
+  box-shadow: 0 0 0 1000px var(--color-input-bg) inset;
+  caret-color: var(--color-text);
+}
+textarea { resize: vertical; min-height: 110px; }
+input:focus, select:focus, textarea:focus { outline: 2px solid transparent; border-color: var(--color-focus); box-shadow: 0 0 0 3px var(--color-focus-ring); }
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid transparent; outline-offset: 0; }
+.has-error input, .has-error select, .has-error textarea { border-color: var(--color-danger); background: var(--color-danger-soft); }
+.req { color: var(--color-danger); }
+.error-text { color: var(--color-danger); font-size: 0.9rem; font-weight: 700; margin: 0.35rem 0 0; }
+.hint-text { color: var(--color-text-muted); font-size: 0.85rem; margin: 0.3rem 0 0; }
+.note-text { color: var(--color-text-muted); font-size: 0.9rem; }
+.checkbox-field { margin: 0.5rem 0 1.5rem; }
+/* ".form-field .agreement-label" is more specific than ".form-field label" (display: block),
+   which is what was stopping flex and gap from working on this label. */
+.form-field .agreement-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  line-height: 1.4;
+}
+.form-field .agreement-label input[type="checkbox"] {
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  flex: 0 0 24px;
+  /* general input rule sets min-height: 46px, so reset it for the checkbox */
+  min-width: 24px;
+  min-height: 24px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+.form-field .agreement-label span {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+}
+.form-switch { text-align: center; margin: 1rem 0 0.5rem; }
+.success-message {
+  background: var(--color-success-soft); color: var(--color-success-text); border: 1.5px solid var(--color-success-border);
+  border-radius: var(--radius-sm); padding: 1rem 1.25rem; margin-bottom: 1.25rem;
+  animation: pop-in 0.45s ease both;
+}
+.notice { background: var(--color-primary-soft); color: var(--color-text); border-radius: var(--radius-sm); padding: 0.8rem 1rem; text-align: center; }
+
+/* ----- Animations ----- */
+@keyframes pop-in { from { opacity: 0; transform: translateY(-10px) scale(0.97); } to { opacity: 1; transform: none; } }
+@keyframes fade-up { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important; scroll-behavior: auto !important;
+  }
+  .reveal { opacity: 1; transform: none; }
+}

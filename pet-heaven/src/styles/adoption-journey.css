@@ -1,0 +1,77 @@
+/* ===== Pet Heaven: Adoption Journey Tracker =====
+   Uses only the theme variables from global.css, so light and dark mode both work.
+   The layout follows the width of the tracker itself (container query): vertical when narrow, horizontal when wide. */
+.journey { container-type: inline-size; }
+
+.journey-summary {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.8rem;
+  background: var(--color-surface-soft); border: 1px solid var(--color-border); border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-sm); padding: 0.75rem 1rem; margin-bottom: 1.25rem;
+}
+.journey-badge { display: inline-block; padding: 0.2rem 0.8rem; border-radius: 999px; font-size: 0.8rem; font-weight: 800; background: var(--color-primary); color: var(--color-on-primary); }
+.journey-date { font-size: 0.88rem; font-weight: 700; color: var(--color-text-muted); }
+.journey-message, .journey-reason { flex: 1 1 100%; margin: 0; font-size: 0.95rem; color: var(--color-text); }
+.journey-summary-complete { background: var(--color-success-soft); border-color: var(--color-success-border); border-left-color: var(--color-success); }
+.journey-summary-complete .journey-badge { background: var(--color-success); color: var(--color-on-success); }
+.journey-summary-complete .journey-message { color: var(--color-success-text); }
+.journey-summary-stopped { background: var(--color-danger-soft); border-color: var(--color-danger-border); border-left-color: var(--color-danger); }
+.journey-summary-stopped .journey-badge { background: var(--color-danger); color: var(--color-on-primary); }
+.journey-summary-stopped .journey-reason { color: var(--color-danger); font-weight: 700; }
+.journey-summary-stopped .journey-reason strong { color: inherit; }
+
+/* Narrow: vertical timeline */
+.journey-steps { list-style: none; margin: 0; padding: 0; display: grid; }
+.journey-step {
+  position: relative; display: grid; grid-template-columns: 36px minmax(0, 1fr); column-gap: 0.85rem; align-items: start;
+  padding-bottom: 1rem;
+}
+.journey-step:last-child { padding-bottom: 0; }
+.journey-step::before { content: ''; position: absolute; left: 17px; top: 36px; bottom: 0; width: 2px; background: var(--color-border); }
+.journey-step:last-child::before { display: none; }
+.journey-step.is-done::before { background: var(--color-primary); }
+.journey-marker {
+  position: relative; z-index: 1; grid-row: 1 / span 2; display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--color-border); background: var(--color-surface);
+  color: var(--color-text-muted); font-family: var(--font-head); font-weight: 800; line-height: 1;
+}
+.journey-label { display: flex; align-items: center; min-height: 36px; font-weight: 800; font-size: 0.95rem; color: var(--color-text-muted); overflow-wrap: anywhere; }
+.journey-step-date { font-size: 0.82rem; color: var(--color-text-muted); }
+
+.journey-step.is-done .journey-marker { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-on-primary); }
+.journey-step.is-done .journey-label { color: var(--color-text); }
+.journey-step.is-current .journey-marker { border: 3px solid var(--color-primary); color: var(--color-link); box-shadow: 0 0 0 4px var(--color-primary-soft); }
+.journey-step.is-current .journey-label { color: var(--color-link); }
+.journey-step.is-stopped .journey-marker { background: var(--color-danger); border-color: var(--color-danger); color: var(--color-on-primary); }
+.journey-step.is-stopped .journey-label, .journey-step.is-stopped .journey-step-date { color: var(--color-danger); }
+.journey-step.is-upcoming { opacity: 0.85; }
+
+/* Employee controls */
+.journey-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px dashed var(--color-border); }
+.journey-controls input { flex: 1 1 220px; min-width: 0; width: auto; }
+.journey-note { flex: 1 1 100%; margin: 0; font-size: 0.88rem; color: var(--color-text-muted); }
+@container (max-width: 559px) {
+  .journey-controls .btn { flex: 1 1 100%; }
+}
+
+/* Wide: horizontal timeline */
+@container (min-width: 560px) {
+  .journey-steps { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .journey-step { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.35rem; padding: 0 0.25rem; }
+  .journey-step::before { display: block; left: -50%; right: 50%; top: 17px; bottom: auto; width: auto; height: 2px; }
+  .journey-step:first-child::before { display: none; }
+  .journey-step.is-current::before { background: var(--color-primary); }
+  .journey-step.is-stopped::before { background: var(--color-danger); }
+  .journey-label { min-height: 0; justify-content: center; font-size: 0.88rem; }
+}
+
+/* My Applications cards */
+.journey-card + .journey-card { margin-top: 1.25rem; }
+.journey-card-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.3rem 1rem; margin-bottom: 1rem; }
+.journey-card-head h2, .journey-card-head h3 { margin: 0; font-size: 1.25rem; }
+.journey-card-head span { color: var(--color-text-muted); font-size: 0.9rem; }
+
+/* Employee table: the tracker sits in its own row under each application */
+.admin-table tr.journey-parent > td { border-bottom: 0; }
+.admin-table tr.journey-row > td { padding: 0.4rem 0.9rem 1.5rem; }
+/* The table scrolls sideways on phones, so the tracker stays as wide as the visible screen */
+.admin-table .journey { position: sticky; left: 0.9rem; width: min(100%, calc(100vw - 3.5rem)); }

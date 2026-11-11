@@ -1,0 +1,36 @@
+/* ----- Virtual Pet Personality Test ----- */
+.pt-card { margin-inline: auto; }
+.pt-progress { margin-bottom: 1.5rem; }
+.pt-progress-text { display: flex; justify-content: space-between; gap: 1rem; font-weight: 800; font-size: 0.95rem; margin-bottom: 0.5rem; }
+.pt-progress-text span:last-child { color: var(--color-text-muted); }
+.pt-progress-bar { height: 12px; border-radius: 999px; background: var(--color-surface-soft); border: 1px solid var(--color-border); overflow: hidden; }
+.pt-progress-bar span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--color-primary), var(--color-cta-to)); transition: width 0.3s ease; }
+.pt-title { font-size: 1.4rem; margin-bottom: 0.3rem; }
+.pt-title:focus, .pt-results .section-head h2:focus { outline: none; }
+.pt-title:focus-visible, .pt-results .section-head h2:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 4px; }
+.pt-help { color: var(--color-text-muted); margin-bottom: 1rem; }
+.pt-fieldset { border: 0; padding: 0; margin: 0 0 1.25rem; min-width: 0; }
+.pt-legend { padding: 0; width: 100%; font-weight: 800; margin-bottom: 0.5rem; }
+.pt-legend-note { font-weight: 600; color: var(--color-text-muted); }
+.pt-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 0.7rem; }
+.pt-option {
+  display: flex; align-items: center; gap: 0.8rem; min-height: 52px; padding: 0.7rem 1rem; cursor: pointer;
+  background: var(--color-input-bg); border: 2px solid var(--color-input-border); border-radius: var(--radius-sm);
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.pt-option:hover { border-color: var(--color-primary); }
+.pt-option input { width: 1.25rem; height: 1.25rem; flex-shrink: 0; margin: 0; accent-color: var(--color-primary); }
+.pt-option.is-selected { border-color: var(--color-primary); background: var(--color-primary-soft); }
+.pt-option.is-locked { opacity: 0.55; cursor: not-allowed; }
+.pt-option:focus-within { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+.pt-option-text { display: grid; gap: 0.1rem; overflow-wrap: anywhere; }
+.pt-option-text small { color: var(--color-text-muted); font-size: 0.85rem; }
+.pt-actions { display: flex; justify-content: space-between; gap: 0.75rem; margin-top: 1.25rem; }
+.pt-actions .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.pt-results { margin-top: 0; }
+.pt-retake { margin-top: 2rem; }
+
+@media (max-width: 480px) {
+  .pt-actions .btn { flex: 1 1 0; }
+  .pt-option { padding: 0.6rem 0.8rem; }
+}
